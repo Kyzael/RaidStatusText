@@ -38,12 +38,13 @@ jobs:
         
         # Create package directory with the correct addon name
         mkdir -p "$INTERNAL_FOLDER"
+        mkdir -p "$INTERNAL_FOLDER/Modules"
         
         # Copy addon files (only the new simplified files)
         cp RaidStatusText.lua "$INTERNAL_FOLDER/"
         cp RaidStatusText.toc "$INTERNAL_FOLDER/"
         cp -r libs/Ace-3.0/ "$INTERNAL_FOLDER/libs/"
-        cp -r Modules/Config_RaidStatusText.lua "$INTERNAL_FOLDER/Modules/"
+        cp Modules/Config_RaidStatusText.lua "$INTERNAL_FOLDER/Modules/"
         
         # Create zip file with version in filename but correct folder inside
         zip -r "${PACKAGE_NAME}.zip" "$INTERNAL_FOLDER"
