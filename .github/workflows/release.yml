@@ -1,0 +1,90 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - '*-release'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Extract version from tag
+      id: extract_version
+      run: |
+        TAG_NAME=${GITHUB_REF#refs/tags/}
+        VERSION=${TAG_NAME%-release}
+        echo "version=$VERSION" >> $GITHUB_OUTPUT
+        echo "tag_name=$TAG_NAME" >> $GITHUB_OUTPUT
+    
+    - name: Update TOC version
+      run: |
+        VERSION="${{ steps.extract_version.outputs.version }}"
+        sed -i "s/^## Version: .*/## Version: $VERSION/" RaidStatusText.toc
+    
+    - name: Create addon package
+      id: create_addon_package
+      run: |
+        VERSION="${{ steps.extract_version.outputs.version }}"
+        ADDON_NAME="RaidStatusText"
+        PACKAGE_NAME="${ADDON_NAME}-${VERSION}"
+        INTERNAL_FOLDER="RaidStatusText"
+        
+        # Create package directory with the correct addon name
+        mkdir -p "$INTERNAL_FOLDER"
+        
+        # Copy addon files (only the new simplified files)
+        cp RaidStatusText.lua "$INTERNAL_FOLDER/"
+        cp RaidStatusText.toc "$INTERNAL_FOLDER/"
+        cp -r libs/Ace-3.0/ "$INTERNAL_FOLDER/libs/"
+        cp -r Modules/Config_RaidStatusText.lua "$INTERNAL_FOLDER/Modules/"
+        
+        # Create zip file with version in filename but correct folder inside
+        zip -r "${PACKAGE_NAME}.zip" "$INTERNAL_FOLDER"
+        
+        echo "package_name=${PACKAGE_NAME}" >> $GITHUB_ENV
+        echo "zip_file=${PACKAGE_NAME}.zip" >> $GITHUB_ENV
+        echo "zip_file=${PACKAGE_NAME}.zip" >> $GITHUB_OUTPUT
+    
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Check for either changelog file
+        if [ -f CHANGELOG_RaidStatus.md ]; then
+          CHANGELOG_FILE="CHANGELOG_RaidStatus.md"
+        elif [ -f CHANGELOG.md ]; then
+          CHANGELOG_FILE="CHANGELOG.md"
+        else
+          CHANGELOG="Release ${{ steps.extract_version.outputs.version }}"
+          echo "$CHANGELOG" > changelog.txt
+          echo "changelog_file=changelog.txt" >> $GITHUB_OUTPUT
+          exit 0
+        fi
+        
+        # Extract changelog for this version if it exists
+        CHANGELOG=$(awk '/^## \['"${{ steps.extract_version.outputs.version }}"'\]/{flag=1; next} /^## \[/{flag=0} flag' "$CHANGELOG_FILE" || echo "")
+        if [ -z "$CHANGELOG" ]; then
+          CHANGELOG="Release ${{ steps.extract_version.outputs.version }}"
+        fi
+        
+        # Save changelog to file for multiline handling
+        echo "$CHANGELOG" > changelog.txt
+        echo "changelog_file=changelog.txt" >> $GITHUB_OUTPUT
+        
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: ${{ steps.extract_version.outputs.tag_name }}
+        name: "RaidStatusText v${{ steps.extract_version.outputs.version }}"
+        body_path: changelog.txt
+        files: ${{ steps.create_addon_package.outputs.zip_file }}
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
