@@ -2,7 +2,7 @@
 ## Title: RaidStatusText
 ## Notes: Raid Status Text for Mists of Pandaria Classic - Shows defensive cooldowns on raid frames
 ## Author: Tawl(Kyzael)  
-## Version: 1.0.1
+## Version: 1.0.0
 
 ## SavedVariables: RaidStatusTextDB
 
