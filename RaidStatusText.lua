@@ -15,7 +15,7 @@ local AceConsole = LibStub("AceConsole-3.0")
 local statusGUIDs = {}
 local RSTdb = {}
 
--- Status Text Configuration Lists (copied exactly from HealBarsClassic)
+-- Status Text Configuration Lists
 RaidStatusText.lastStandStatusTextConfigList = { 
   ['LASTSTAND'] = 'Last Stand - LASTSTAND',
   ['VAMPIRIC'] = 'Vampiric Blood - VAMPIRIC',
@@ -69,7 +69,7 @@ RaidStatusText.miscStatusTextConfigList = {
   ['ROAR'] = 'Roar of Sacrifice - ROAR'
 }
 
--- MoP Defensive Spell Database (copied exactly from HealBarsClassic)
+-- MoP Defensive Spell Database
 local defensiveSpells = {
   -- IMMUNITY ABILITIES (Priority 1-5) - Complete damage immunity or near-immunity
   [642] = { name = 'DIVSHIELD', duration = 8, priority = 1 },                         -- Divine Shield (MoP: 8 seconds)
@@ -126,7 +126,7 @@ local defensiveSpells = {
   [51755] = { name = 'ANTIMAGIC', duration = 10, priority = 37 }                     -- Anti-Magic Zone (MoP: 10 seconds)
 }
 
--- Default configuration (copied pattern from HealBarsClassic)
+-- Default configuration
 local RSTdefault = { 
   global = { 
     defensiveIndicator = true, 
@@ -144,7 +144,7 @@ local RSTdefault = {
   } 
 }
 
--- Function to get frame info (copied from HealBarsClassic)
+-- Function to get frame info
 function RaidStatusText:GetFrameInfo(unitFrame)
   local displayedUnit, healthBar
   if not unitFrame then return end
@@ -161,7 +161,7 @@ function RaidStatusText:GetFrameInfo(unitFrame)
   return displayedUnit, healthBar
 end
 
--- UpdateAuras function (copied exactly from HealBarsClassic)
+-- UpdateAuras function
 function RaidStatusText:UpdateAuras(unitFrame)
   local index = 1
   local statusUpdate = false
@@ -187,7 +187,7 @@ function RaidStatusText:UpdateAuras(unitFrame)
   until (not spellId)
 end
 
--- Global hook function (copied exactly from HealBarsClassic pattern)
+-- Global hook function
 function CompactUnitFrame_UpdateStatusTextRSTHook(unitFrame)
   if not unitFrame.statusText or not unitFrame.optionTable.displayStatusText or not UnitIsConnected(unitFrame.displayedUnit) or UnitIsDeadOrGhost(unitFrame.displayedUnit) then
     return
@@ -228,7 +228,7 @@ function CompactUnitFrame_UpdateStatusTextRSTHook(unitFrame)
   end
 end
 
--- Function to get simple status text (copied exactly from HealBarsClassic)
+-- Function to get simple status text
 function RaidStatusText:GetSimpleStatusText(spellName)
   -- Only simplify text for these 4 categories: Last Stand, Shield Wall, Defensive, and Spell Wall
   if RaidStatusText.lastStandStatusTextConfigList[spellName] then
@@ -262,14 +262,14 @@ function RaidStatusText:OnEnable()
     AceConfigDialog:AddToBlizOptions('RSTOptions', 'RaidStatusText')
   end
   
-  -- Hook status text function (exact pattern from HealBarsClassic)
+  -- Hook status text function
   hooksecurefunc("CompactUnitFrame_UpdateStatusText", CompactUnitFrame_UpdateStatusTextRSTHook)
   
   -- Register for UNIT_AURA events to update when buffs change
   self:RegisterEvent("UNIT_AURA")
 end
 
--- UNIT_AURA event handler that calls UpdateAuras (pattern from HealBarsClassic)
+-- UNIT_AURA event handler that calls UpdateAuras
 function RaidStatusText:UNIT_AURA(event, unitId)
   -- Update auras for the specific unit
   local unitFrame = _G["CompactRaidFrame1"]
